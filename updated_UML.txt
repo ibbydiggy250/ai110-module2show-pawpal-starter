@@ -1,0 +1,41 @@
+classDiagram
+    class Task {
+        +String name
+        +int duration
+        +int priority
+        +String description
+        +bool completed
+        +edit(name, duration, priority, description)
+        +mark_complete()
+    }
+
+    class Pet {
+        +String name
+        +String species
+        +String breed
+        +int age
+        +List~Task~ tasks
+        +assign_task(task)
+        +get_summary()
+    }
+
+    class Scheduler {
+        +Owner owner
+        +get_all_tasks()
+        +generate_plan()
+    }
+
+    class Owner {
+        +String name
+        +String email
+        +List~Pet~ pets
+        +Scheduler scheduler
+        +register_pet(pet)
+        +create_task(name, duration, priority, description)
+    }
+
+    Owner "1" --> "0..*" Pet : owns
+    Owner "1" --> "1" Scheduler : has
+    Owner ..> Task : creates
+    Pet "1" --> "0..*" Task : stores
+    Scheduler --> Owner : references
