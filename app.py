@@ -80,11 +80,16 @@ if st.session_state.pets:
     selected_pet = next(p for p in st.session_state.pets if p.name == selected_pet_name)
 
     if st.button("Add task"):
-        task = st.session_state.owner.create_task(
+        candidate = st.session_state.owner.create_task(
             name=task_title, time=time, priority=priority, description="", frequency=frequency
         )
-        selected_pet.assign_task(task)
-        st.session_state.tasks.append((task, selected_pet.name))
+        conflicts = st.session_state.scheduler.detect_conflicts(candidate)
+        if conflicts:
+            conflict_names = ", ".join(f"'{t.name}'" for t in conflicts)
+            st.warning(f"Time conflict at {time}: {conflict_names} is already scheduled at this time. Choose a different time.")
+        else:
+            selected_pet.assign_task(candidate)
+            st.session_state.tasks.append((candidate, selected_pet.name))
 else:
     st.info("Register a pet first before adding tasks.")
 

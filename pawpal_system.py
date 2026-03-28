@@ -25,7 +25,10 @@ class Task:
         self.completed = True
 
     def renew(self) -> "Task":
-        # Returns a new Task instance due at the next occurrence (daily: +1 day, weekly: +7 days).
+        # Recurring Task Algorithm: Instead of mutating the completed task, this creates a brand
+        # new Task instance with an advanced due_date using timedelta arithmetic. This preserves
+        # the history of the completed task while automatically queuing the next occurrence,
+        # eliminating the need for manual re-entry of repeating care tasks.
         if self.frequency == "daily":
             next_due = self.due_date + timedelta(days=1)
         elif self.frequency == "weekly":
@@ -83,7 +86,10 @@ class Scheduler:
         # Returns all tasks sorted by priority, lowest number first (1 = highest priority).
         return sorted(self.get_all_tasks(), key=lambda t: t.priority)
     def filter_tasks(self, pet_name: str | None = None, completed: bool | None = None) -> list[Task]:
-        # Returns tasks filtered by pet name and/or completion status. None means no filter applied.
+        # Filter Algorithm: Iterates all tasks once and applies up to two conditions (pet name,
+        # completion status) in a single pass using a list comprehension. Using None as a sentinel
+        # value makes each filter optional — only active filters are evaluated, avoiding separate
+        # methods for every filter combination.
         return [
             task
             for pet in self.owner.pets
@@ -92,8 +98,18 @@ class Scheduler:
             and (completed is None or task.completed == completed)
         ]
 
+    def detect_conflicts(self, candidate: Task) -> list[Task]:
+        # Conflict Detection Algorithm: Before a task is added, this scans all existing tasks
+        # across every pet for a matching time value. Because HH:MM strings compare correctly
+        # as plain strings, no time parsing is needed. Returning a list (rather than a bool)
+        # lets the UI name the specific conflicting tasks in the warning message.
+        return [task for task in self.get_all_tasks() if task.time == candidate.time]
+
     def sort_by_time(self) -> list[Task]:
-        # Returns all tasks sorted by their time attribute in HH:MM format, earliest first.
+        # Sort Algorithm: Uses Python's built-in sorted() with a lambda key that extracts the
+        # HH:MM string from each task. Because all times share the same fixed format, lexicographic
+        # string comparison is equivalent to chronological order — no datetime parsing required,
+        # keeping the sort lightweight and readable.
         return sorted(self.get_all_tasks(), key=lambda t: t.time)
 
 
