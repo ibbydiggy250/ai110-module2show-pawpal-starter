@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 
 
 @dataclass
@@ -9,6 +10,7 @@ class Task:
     description: str
     frequency: str = "once"
     completed: bool = False
+    due_date: date = field(default_factory=date.today)
 
     def edit(self, name: str, time: str, priority: int, description: str, frequency: str) -> None:
         # Overwrites the task's attributes with the provided values.
@@ -21,6 +23,34 @@ class Task:
     def mark_complete(self) -> None:
         # Sets the task as completed.
         self.completed = True
+
+    def renew(self) -> "Task":
+        # Returns a new Task instance due at the next occurrence (daily: +1 day, weekly: +7 days).
+        if self.frequency == "daily":
+            next_due = self.due_date + timedelta(days=1)
+        elif self.frequency == "weekly":
+            next_due = self.due_date + timedelta(days=7)
+        else:
+            next_due = self.due_date
+        return Task(
+            name=self.name,
+            time=self.time,
+            priority=self.priority,
+            description=self.description,
+            frequency=self.frequency,
+            due_date=next_due,
+        )
+
+    @property
+    def due_in(self) -> str:
+        # Returns a human-readable string of how many days until the task is due.
+        days = (self.due_date - date.today()).days
+        if days == 0:
+            return "Due today"
+        elif days == 1:
+            return "Due tomorrow"
+        else:
+            return f"Due in {days} days"
 
 
 @dataclass

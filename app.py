@@ -73,7 +73,7 @@ with col2:
 with col3:
     priority = st.selectbox("Priority", [1, 2, 3, 4, 5], index=2)
 with col4:
-    frequency = st.selectbox("Frequency", ["once", "daily", "weekly", "monthly", "custom"])
+    frequency = st.selectbox("Frequency", ["once", "daily", "weekly"])
 
 if st.session_state.pets:
     selected_pet_name = st.selectbox("Assign to pet", [p.name for p in st.session_state.pets])
@@ -114,25 +114,35 @@ if st.session_state.tasks:
         for task in pet.tasks
     }
 
-    col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 3, 2, 2, 2])
+    col1, col2, col3, col4, col5, col6, col7 = st.columns([1, 2, 3, 2, 2, 2, 2])
     col1.markdown("**Done**")
     col2.markdown("**Pet**")
     col3.markdown("**Task**")
     col4.markdown("**Time**")
     col5.markdown("**Priority**")
     col6.markdown("**Frequency**")
+    col7.markdown("**Due**")
     st.divider()
     for task in filtered:
-        col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 3, 2, 2, 2])
+        col1, col2, col3, col4, col5, col6, col7 = st.columns([1, 2, 3, 2, 2, 2, 2])
         checked = col1.checkbox("", value=task.completed, key=id(task))
         if checked and not task.completed:
             task.mark_complete()
+            if task.frequency in ("daily", "weekly"):
+                new_task = task.renew()
+                pet_name_for_task = task_to_pet.get(id(task), "")
+                pet_for_task = next((p for p in st.session_state.pets if p.name == pet_name_for_task), None)
+                if pet_for_task:
+                    pet_for_task.assign_task(new_task)
+                    st.session_state.tasks.append((new_task, pet_name_for_task))
+                st.rerun()
         label = f"~~{task.name}~~" if task.completed else task.name
         col2.markdown(task_to_pet.get(id(task), ""))
         col3.markdown(label)
         col4.markdown(task.time)
         col5.markdown(str(task.priority))
         col6.markdown(task.frequency)
+        col7.markdown(task.due_in)
 else:
     st.info("No tasks yet. Add one above.")
 
