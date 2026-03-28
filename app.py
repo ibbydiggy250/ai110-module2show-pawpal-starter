@@ -69,7 +69,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     task_title = st.text_input("Task title", value="Morning walk")
 with col2:
-    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+    time = st.text_input("Time (HH:MM)", value="08:00")
 with col3:
     priority = st.selectbox("Priority", [1, 2, 3, 4, 5], index=2)
 with col4:
@@ -81,7 +81,7 @@ if st.session_state.pets:
 
     if st.button("Add task"):
         task = st.session_state.owner.create_task(
-            name=task_title, duration=int(duration), priority=priority, description="", frequency=frequency
+            name=task_title, time=time, priority=priority, description="", frequency=frequency
         )
         selected_pet.assign_task(task)
         st.session_state.tasks.append((task, selected_pet.name))
@@ -90,23 +90,47 @@ else:
 
 if st.session_state.tasks:
     st.write("Current tasks:")
+
+    filter_col1, filter_col2, filter_col3 = st.columns(3)
+    with filter_col1:
+        pet_options = ["All"] + [p.name for p in st.session_state.pets]
+        pet_filter = st.selectbox("Filter by pet", pet_options)
+    with filter_col2:
+        status_filter = st.selectbox("Filter by status", ["All", "Pending", "Completed"])
+    with filter_col3:
+        sort_by = st.selectbox("Sort by", ["Default", "Time"])
+
+    pet_arg = None if pet_filter == "All" else pet_filter
+    completed_arg = None if status_filter == "All" else (status_filter == "Completed")
+
+    filtered = st.session_state.scheduler.filter_tasks(pet_name=pet_arg, completed=completed_arg)
+    if sort_by == "Time":
+        filtered = sorted(filtered, key=lambda t: t.time)
+
+    pet_lookup = {p.name: p for p in st.session_state.pets}
+    task_to_pet = {
+        id(task): pet.name
+        for pet in st.session_state.pets
+        for task in pet.tasks
+    }
+
     col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 3, 2, 2, 2])
     col1.markdown("**Done**")
     col2.markdown("**Pet**")
     col3.markdown("**Task**")
-    col4.markdown("**Duration**")
+    col4.markdown("**Time**")
     col5.markdown("**Priority**")
     col6.markdown("**Frequency**")
     st.divider()
-    for task, pet_name in st.session_state.tasks:
+    for task in filtered:
         col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 3, 2, 2, 2])
-        checked = col1.checkbox("", value=task.completed, key=task.name)
+        checked = col1.checkbox("", value=task.completed, key=id(task))
         if checked and not task.completed:
             task.mark_complete()
         label = f"~~{task.name}~~" if task.completed else task.name
-        col2.markdown(pet_name)
+        col2.markdown(task_to_pet.get(id(task), ""))
         col3.markdown(label)
-        col4.markdown(f"{task.duration} min")
+        col4.markdown(task.time)
         col5.markdown(str(task.priority))
         col6.markdown(task.frequency)
 else:
