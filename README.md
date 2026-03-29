@@ -58,7 +58,7 @@ Before any task is added, the scheduler checks all existing tasks across every p
 
 # Demo
 
-<a href="/course_images/ai110/demo.png" target="_blank"><img src='/course_images/ai110/demo.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+![PawPal App](demo.png)
 
 ### Suggested workflow
 
