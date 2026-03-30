@@ -47,6 +47,8 @@ One tradeoff I made was that when generating a plan, the scheduler sorts purely 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
 
+I used AI heavily for brainstorming and implementation. For the classes, attributes and methods, I had AI draft an idea, which from there I tweaked and refined. This was the same for each part. The prompt that was most helpful was "Do not focus on code, we are just ideating." This made claude less code oriented, and more feature and idea oriented.
+
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
@@ -62,11 +64,18 @@ One example is when I asked it to look at the renew function, and see if I could
 - What behaviors did you test?
 - Why were these tests important?
 
+I ran tests that cover ensuring completed actually gets marked, tasks are added to the list, out-of-order tasks become sorted, conflict detection is ensured, making sure an empty schedule does not crash, a task on pet a blocks pet b at the same time, a completed task still blocks a new task at the same time, and with two pets and mixed completion only the completed pets task is returned.
+
+I decided that these tesrs are the most important because these are the core features that users will be using and working with. If these things break, the users experience is ruined, and there are risks of crashing.
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
 
+I am fairly confident that the scheduler will work correctly, roughly a 4/5. The core happy path is mostly covered, and they should run under normal scenarios. Also multi-pet scenarios are all functional, which handles some edge cases. Only reason i am not confident is because overdue tasks aren't really handled, and could cause issues in the system, but it wasn't an issue I experienced at the moment, so I didn't need to test it there.
+
+Some edge cases I would test if I had more time would be editing a task, testing for overdue tasks, and testing the generate plan function, ensuring its accurate in terms of priority.
 ---
 
 ## 5. Reflection
@@ -75,10 +84,16 @@ One example is when I asked it to look at the renew function, and see if I could
 
 - What part of this project are you most satisfied with?
 
+I am  most satisfied with the task implementation. I think all of my attributes are properly implemented, the completion feature seems to be working well, and I am especially proud of the way I implemented the sorting and filtering methods. It looks professional, and the implementation is very clean. 
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+I would improve the generate schedule feature better. Since it was an optional feature that I added, but I didnt implement it fully. Next iteration, I believe this is a feature that I would want to work on more
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+While AI is good at designing algorithms, it needs to have a strong plan with examples implemented before applying it. If its not given this blueprint, it will implement this algorithm wrong. By using the UML and describing each feature I wanted implemented fully, the AI was able to make these algorithms more effectively, and not generate thousands of lines of code.
